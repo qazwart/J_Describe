@@ -1,0 +1,127 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>jdescribe.pl</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:_mdnsresponder@b1026.apple.com" />
+</head>
+
+<body style="background-color: white">
+
+
+<!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#options">OPTIONS</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+	<li><a href="#copyright">COPYRIGHT</a></li>
+</ul>
+
+<hr name="index" />
+</div>
+<!-- INDEX END -->
+
+<p>
+</p>
+<hr />
+<h1><a name="name">NAME</a></h1>
+<p>jdescribe.pl</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<pre>
+    description [ -jenkins &lt;jenkins_url&gt; ] -job &lt;job_name&gt; \
+        -build &lt;build_num&gt; -description &lt;description&gt; \
+        [ -user &lt;user_id&gt; -password &lt;password_or_api_token&gt; ]</pre>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p>This program allows you to change the description of a Jenkins build</p>
+<p>
+</p>
+<hr />
+<h1><a name="options">OPTIONS</a></h1>
+<dl>
+<dt><strong><a name="jenkins" class="item">-jenkins</a></strong></dt>
+
+<dd>
+<p>The URL of the Jenkins server. Default is set with <code>use  constant</code>. You
+can override this with this option, or change the constant.</p>
+<p><strong>NOTE</strong>: This must start with <code>http://</code> or <code>https://</code></p>
+</dd>
+<dt><strong><a name="user" class="item">-user</a></strong></dt>
+
+<dd>
+<p>The User to log into the server. This is optional if there is no
+security required to set the description. This is set by default with
+<code>use constant</code>. You may override this by changing the constant, or via
+command line parameter. If there is no security, change the constant to
+an <code>undef</code>;</p>
+</dd>
+<dt><strong><a name="password" class="item">-password</a></strong></dt>
+
+<dd>
+<p>The User's password or API tokent. You can find the API Token by going
+into that user's Jenkins page, click on <em>Configure</em>, then click on the
+<em>Show API Token...</em> button.</p>
+<p>This is set by default with a <code>use constant</code> clause. You may override
+this with a command line parameter. If there is no security, change the
+constant to an <code>undef</code></p>
+</dd>
+<dt><strong><a name="job" class="item">-job</a></strong></dt>
+
+<dd>
+<p>The Jenkins Job name. Required.</p>
+</dd>
+<dt><strong><a name="build" class="item">-build</a></strong></dt>
+
+<dd>
+<p>The Jenkins Build Number for that job. Required.</p>
+</dd>
+<dt><strong><a name="description" class="item">-description</a></strong></dt>
+
+<dd>
+<p>The description you want to set the job to. Required</p>
+</dd>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>David Weintraub <em><a href="mailto:david@weintraub.name">david@weintraub.name</a></em></p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright">COPYRIGHT</a></h1>
+<p>Copyright (c) 2013 by David Weintraub. All rights reserved. This program
+is covered by the open source BMAB license.</p>
+<p>The BMAB (Buy me a beer) license allows you to use all code for whatever
+reason you want with these three caveats:</p>
+<ol>
+<li>
+<p>If you make any modifications in the code, please consider sending them
+to me, so I can put them into my code.</p>
+</li>
+<li>
+<p>Give me attribution and credit on this program.</p>
+</li>
+<li>
+<p>If you're in town, buy me a beer. Or, a cup of coffee which is what I'd
+prefer. Or, if you're feeling really spendthrify, you can buy me lunch.
+I promise to eat with my mouth closed and to use a napkin instead of my
+sleeves.</p>
+</li>
+</ol>
+
+</body>
+
+</html>
