@@ -31,7 +31,6 @@
 
 <p>
 </p>
-<hr />
 <h1><a name="name">NAME</a></h1>
 <p>jdescribe.pl</p>
 <p>
@@ -54,83 +53,15 @@
 <p>This program uses LWP and other associated Perl http modules (including
 HTTP::Request and URI).</p>
 <p>The way LWP works in Perl is a bit confusing. You create a <em>browser</em> in
-Perl using the <code>LWP::UserAgent-</code>new&gt; constructor. To actually use this
-<em>browser</em>, you must construct <em>http requests</em>. To do this, you must
-create a request object via the <code>HTTP::Request-</code>new&gt; constructor. Once
-you create the request object, you build it bit-by-bit using the various
-<code>HTTP::Request</code> methods.</p>
-<p>In this program, we must make a <em>POST</em> request to the <em>Submit
-Description</em> URL for Jenkins. We may also be required to log into
-Jenkins before we can do a request. This is handled by the
-<code>authorization_basic</code> method for the request. Thus, we need to do the
-following steps:</p>
-<ul>
-<li><strong><a name="new" class="item"><strong>Build the User Browser</strong>: <code>$browser = LWP::UserAgent-&gt;new;</code></a></strong>
-
-</li>
-<li><strong><strong>Create a request</strong>: <code>$request = HTTP::Request-&gt;new;</code></strong>
-
-</li>
-<li><strong><a name="method" class="item"><strong>Set the method for the request</strong>: <code>$request-&gt;method(&quot;POST&quot;);</code></a></strong>
-
-</li>
-<li><strong><a name="url" class="item"><strong>Set the URL</strong>: <code>$request-&gt;url(&quot;$jenkins_build/submitDescription&quot;);</code></a></strong>
-
-</li>
-<li><strong><a name="login" class="item"><strong>Login (if necessary)</strong>: <code>$request-&gt;authorization_basic($user, $pass);</code></a></strong>
-
-</li>
-<li><strong><a name="content" class="item"><strong>Set the content</strong>: <code>$request-&gt;content($content);</code></a></strong>
-
-</li>
-</ul>
-<p>The last step is more difficult than it seems. This is because the
-content must be encoded and then you must set headers to explain what
-your content consists of, and how long it is. The simplest way to
-<em>encode</em> the content is to use the <a href="#query_form"><code>query_form</code></a> method of the <code>URI</code>
-package. This means creating a <code>URI</code> object, then using the
-<a href="#query_form"><code>query_form</code></a> method.</p>
-<p>Once that is done, you need to set the headers <code>Content-Type</code> and
-<code>Content-Length</code>. You can do that via the <a href="#header"><code>header</code></a> method of the
-<code>HTTP::Request</code> class.</p>
-<ul>
-<li><strong><a name="object" class="item"><strong>Create a URI object (URL doesn't matter)</strong> <a href="#new"><code>$uri =
-URI-&gt;new(&quot;http://&quot;);</code></a></a></strong>
-
-</li>
-<li><strong><a name="encode_the_string_via_the_query_form_method" class="item"><strong>Encode the string via the <a href="#query_form"><code>query_form</code></a> method </strong>&gt;</a></strong>
-
-<ul>
-<li><strong><a name="query_form" class="item"><code>$uri-&gt;query_form(&quot;Description&quot; =&gt; $description)</code></a></strong>
-
-</li>
-<li><strong><a name="query" class="item"><code>$content = $uri-&gt;query;</code>;</a></strong>
-
-</li>
-</ul>
-</li>
-<li><strong><strong>Now set the encoded content</strong>: <code>$request-&gt;content($content);</code></strong>
-
-</li>
-<li><strong><a name="header" class="item"><strong>Set Content-Type Header</strong>: <code>$request-&gt;header( 'Content-Type' =&gt;
-'application/x-www-form-urlencoded' );</code></a></strong>
-
-</li>
-<li><strong><strong>Set the Content-Length Header</strong>: <code>$request-&gt;header(
-'Content-Length' =&gt; length($content) );</code></strong>
-
-</li>
-</ul>
-<p>Now that the request is built, it can sent to the browser</p>
-<ul>
-<li><strong><a name="request" class="item"><code>$browser-&gt;request($request)</code></a></strong>
-
-</li>
-</ul>
-<p>Nothing could be simpler! There is actually a slightly easier package
-called <code>HTTP::Request::Common</code> that allows you to build the POST
-request, and send the request in a single call, but it doesn't seem
-to work when authentication is required.</p>
+Perl using the <code>LWP::UserAgent-</code>new&gt; constructor.</p>
+<p>What you send to the browser to operate on are &lt;HTTP Requests&gt;. This is
+done via the <code>HTTP::Request</code> module. However, there's a
+<code>HTTP::Request::Common</code> module that uses a <code>POST</code> subroutine to
+construct the <code>HTTP::Request</code> object for you including the content to
+post.</p>
+<p>Once the request object is created, you can use the
+<code>authentication_basic</code> method on the request and forward that request
+to the `<code>LWP::UserAgent</code>` request method.</p>
 <p>
 </p>
 <hr />
