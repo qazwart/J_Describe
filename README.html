@@ -1,0 +1,212 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>jdescribe.pl</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:_mdnsresponder@b1026.apple.com" />
+</head>
+
+<body style="background-color: white">
+
+
+<!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#how_http_works_in_perl">HOW HTTP WORKS IN PERL</a></li>
+	<li><a href="#options">OPTIONS</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+	<li><a href="#copyright">COPYRIGHT</a></li>
+</ul>
+
+<hr name="index" />
+</div>
+<!-- INDEX END -->
+
+<p>
+</p>
+<hr />
+<h1><a name="name">NAME</a></h1>
+<p>jdescribe.pl</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<pre>
+    description [ -jenkins &lt;jenkins_url&gt; ] -job &lt;job_name&gt; \
+        -build &lt;build_num&gt; -description &lt;description&gt; \
+        [ -user &lt;user_id&gt; -password &lt;password_or_api_token&gt; ]</pre>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p>This program allows you to change the description of a Jenkins build.</p>
+<p>
+</p>
+<hr />
+<h1><a name="how_http_works_in_perl">HOW HTTP WORKS IN PERL</a></h1>
+<p>This program uses LWP and other associated Perl http modules (including
+HTTP::Request and URI).</p>
+<p>The way LWP works in Perl is a bit confusing. You create a <em>browser</em> in
+Perl using the <code>LWP::UserAgent-</code>new&gt; constructor. To actually use this
+<em>browser</em>, you must construct <em>http requests</em>. To do this, you must
+create a request object via the <code>HTTP::Request-</code>new&gt; constructor. Once
+you create the request object, you build it bit-by-bit using the various
+<code>HTTP::Request</code> methods.</p>
+<p>In this program, we must make a <em>POST</em> request to the <em>Submit
+Description</em> URL for Jenkins. We may also be required to log into
+Jenkins before we can do a request. This is handled by the
+<code>authorization_basic</code> method for the request. Thus, we need to do the
+following steps:</p>
+<ul>
+<li><strong><a name="new" class="item"><strong>Build the User Browser</strong>: <code>$browser = LWP::UserAgent-&gt;new;</code></a></strong>
+
+</li>
+<li><strong><strong>Create a request</strong>: <code>$request = HTTP::Request-&gt;new;</code></strong>
+
+</li>
+<li><strong><a name="method" class="item"><strong>Set the method for the request</strong>: <code>$request-&gt;method(&quot;POST&quot;);</code></a></strong>
+
+</li>
+<li><strong><a name="url" class="item"><strong>Set the URL</strong>: <code>$request-&gt;url(&quot;$jenkins_build/submitDescription&quot;);</code></a></strong>
+
+</li>
+<li><strong><a name="login" class="item"><strong>Login (if necessary)</strong>: <code>$request-&gt;authorization_basic($user, $pass);</code></a></strong>
+
+</li>
+<li><strong><a name="content" class="item"><strong>Set the content</strong>: <code>$request-&gt;content($content);</code></a></strong>
+
+</li>
+</ul>
+<p>The last step is more difficult than it seems. This is because the
+content must be encoded and then you must set headers to explain what
+your content consists of, and how long it is. The simplest way to
+<em>encode</em> the content is to use the <a href="#query_form"><code>query_form</code></a> method of the <code>URI</code>
+package. This means creating a <code>URI</code> object, then using the
+<a href="#query_form"><code>query_form</code></a> method.</p>
+<p>Once that is done, you need to set the headers <code>Content-Type</code> and
+<code>Content-Length</code>. You can do that via the <a href="#header"><code>header</code></a> method of the
+<code>HTTP::Request</code> class.</p>
+<ul>
+<li><strong><a name="object" class="item"><strong>Create a URI object (URL doesn't matter)</strong> <a href="#new"><code>$uri =
+URI-&gt;new(&quot;http://&quot;);</code></a></a></strong>
+
+</li>
+<li><strong><a name="encode_the_string_via_the_query_form_method" class="item"><strong>Encode the string via the <a href="#query_form"><code>query_form</code></a> method </strong>&gt;</a></strong>
+
+<ul>
+<li><strong><a name="query_form" class="item"><code>$uri-&gt;query_form(&quot;Description&quot; =&gt; $description)</code></a></strong>
+
+</li>
+<li><strong><a name="query" class="item"><code>$content = $uri-&gt;query;</code>;</a></strong>
+
+</li>
+</ul>
+</li>
+<li><strong><strong>Now set the encoded content</strong>: <code>$request-&gt;content($content);</code></strong>
+
+</li>
+<li><strong><a name="header" class="item"><strong>Set Content-Type Header</strong>: <code>$request-&gt;header( 'Content-Type' =&gt;
+'application/x-www-form-urlencoded' );</code></a></strong>
+
+</li>
+<li><strong><strong>Set the Content-Length Header</strong>: <code>$request-&gt;header(
+'Content-Length' =&gt; length($content) );</code></strong>
+
+</li>
+</ul>
+<p>Now that the request is built, it can sent to the browser</p>
+<ul>
+<li><strong><a name="request" class="item"><code>$browser-&gt;request($request)</code></a></strong>
+
+</li>
+</ul>
+<p>Nothing could be simpler! There is actually a slightly easier package
+called <code>HTTP::Request::Common</code> that allows you to build the POST
+request, and send the request in a single call, but it doesn't seem
+to work when authentication is required.</p>
+<p>
+</p>
+<hr />
+<h1><a name="options">OPTIONS</a></h1>
+<dl>
+<dt><strong><a name="jenkins" class="item">-jenkins</a></strong></dt>
+
+<dd>
+<p>The URL of the Jenkins server. Default is set with <code>use  constant</code>. You
+can override this with this option, or change the constant.</p>
+<p><strong>NOTE</strong>: This must start with <code>http://</code> or <code>https://</code></p>
+</dd>
+<dt><strong><a name="user" class="item">-user</a></strong></dt>
+
+<dd>
+<p>The User to log into the server. This is optional if there is no
+security required to set the description. This is set by default with
+<code>use constant</code>. You may override this by changing the constant, or via
+command line parameter. If there is no security, change the constant to
+an <code>undef</code>;</p>
+</dd>
+<dt><strong><a name="password" class="item">-password</a></strong></dt>
+
+<dd>
+<p>The User's password or API tokent. You can find the API Token by going
+into that user's Jenkins page, click on <em>Configure</em>, then click on the
+<em>Show API Token...</em> button.</p>
+<p>This is set by default with a <code>use constant</code> clause. You may override
+this with a command line parameter. If there is no security, change the
+constant to an <code>undef</code></p>
+</dd>
+<dt><strong><a name="job" class="item">-job</a></strong></dt>
+
+<dd>
+<p>The Jenkins Job name. Required.</p>
+</dd>
+<dt><strong><a name="build" class="item">-build</a></strong></dt>
+
+<dd>
+<p>The Jenkins Build Number for that job. Required.</p>
+</dd>
+<dt><strong><a name="description" class="item">-description</a></strong></dt>
+
+<dd>
+<p>The description you want to set the job to. Required</p>
+</dd>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>David Weintraub <em><a href="mailto:david@weintraub.name">david@weintraub.name</a></em></p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright">COPYRIGHT</a></h1>
+<p>Copyright &copy; 2013 by David Weintraub. All rights reserved. This program
+is covered by the open source BMAB license.</p>
+<p>The BMAB (Buy me a beer) license allows you to use all code for whatever
+reason you want with these three caveats:</p>
+<ol>
+<li>
+<p>If you make any modifications in the code, please consider sending them
+to me, so I can put them into my code.</p>
+</li>
+<li>
+<p>Give me attribution and credit on this program.</p>
+</li>
+<li>
+<p>If you're in town, buy me a beer. Or, a cup of coffee which is what I'd
+prefer. Or, if you're feeling really spendthrify, you can buy me lunch.
+I promise to eat with my mouth closed and to use a napkin instead of my
+sleeves.</p>
+</li>
+</ol>
+
+</body>
+
+</html>
