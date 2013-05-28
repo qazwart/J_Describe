@@ -38,8 +38,8 @@
 <hr />
 <h1><a name="synopsis">SYNOPSIS</a></h1>
 <pre>
-    description [ -jenkins &lt;jenkins_url&gt; ] -job &lt;job_name&gt; \
-        -build &lt;build_num&gt; -description &lt;description&gt; \
+    description [ -jenkins &lt;jenkins_url&gt;  -job &lt;job_name&gt; ] \
+        [ -build &lt;build_num&gt; ] -description &lt;description&gt; \
         [ -user &lt;user_id&gt; -password &lt;password_or_api_token&gt; ]</pre>
 <p>
 </p>
@@ -50,18 +50,26 @@
 </p>
 <hr />
 <h1><a name="how_http_works_in_perl">HOW HTTP WORKS IN PERL</a></h1>
-<p>This program uses LWP and other associated Perl http modules (including
-HTTP::Request and URI).</p>
-<p>The way LWP works in Perl is a bit confusing. You create a <em>browser</em> in
-Perl using the <code>LWP::UserAgent-</code>new&gt; constructor.</p>
-<p>What you send to the browser to operate on are &lt;HTTP Requests&gt;. This is
-done via the <code>HTTP::Request</code> module. However, there's a
-<code>HTTP::Request::Common</code> module that uses a <code>POST</code> subroutine to
-construct the <code>HTTP::Request</code> object for you including the content to
-post.</p>
-<p>Once the request object is created, you can use the
-<code>authentication_basic</code> method on the request and forward that request
-to the `<code>LWP::UserAgent</code>` request method.</p>
+<p>This program uses <code>LWP::UserAgent</code> and <code>HTTP::Request::Common</code>. These
+in turn require <code>LWP</code>, <code>URI</code>, <code>HTTP::Response</code>, <code>HTTP::Request</code>
+<code>HTTP::Header</code>, <code>HTTP::Message</code>, <code>HTTP::Response</code> and others. None of
+these are standard Perl modules, but all should be installed via CPAN if
+you install <code>LWP::UserAgent</code> and <code>HTTP::Request::Common</code>.</p>
+<p>In order to use HTTP, you need to first create a virtual browser via the
+<code>new</code> constructor of <code>LWP::UserAgent</code>. Once you create this
+<em>browser</em>, you can send HTTP requests via the <code>request</code> method of
+<code>LWP::UserAgent</code>.</p>
+<p>Constructing the requests is done by <code>HTTP::Request</code> or the
+<code>HTTP::Request::Common</code> modules. The <code>HTTP::Request::Common</code> module
+handles <code>POST</code> and <code>GET</code> requests in a very easy to use manner and
+hides much of the complexity in creating requests.</p>
+<p>In this program, the request is a <code>POST</code> request in a form that
+contains a <a href="#description"><code>description</code></a> field which contains the description of that
+build. The request can do basic authorization via the
+<code>authorization_basic</code> method.</p>
+<p>The constructed request is sent via the virtual browser, and an
+<code>HTTP::response</code> object is returned. This program examines the response
+and verifies that the request was successful.</p>
 <p>
 </p>
 <hr />
@@ -70,9 +78,10 @@ to the `<code>LWP::UserAgent</code>` request method.</p>
 <dt><strong><a name="jenkins" class="item">-jenkins</a></strong></dt>
 
 <dd>
-<p>The URL of the Jenkins server. Default is set with <code>use  constant</code>. You
-can override this with this option, or change the constant.</p>
-<p><strong>NOTE</strong>: This must start with <code>http://</code> or <code>https://</code></p>
+<p>The URL of the Jenkins server. By default, this is taken from the
+<code>$JENKINS_URL</code> environment variable that is set by Jenkins when it
+runs. If you use this parameter, be sure to give the full JENKINS URL
+including the <code>HTTP://</code> or <code>HTTPS://</code> protocol prefix.</p>
 </dd>
 <dt><strong><a name="user" class="item">-user</a></strong></dt>
 
@@ -86,7 +95,7 @@ an <code>undef</code>;</p>
 <dt><strong><a name="password" class="item">-password</a></strong></dt>
 
 <dd>
-<p>The User's password or API tokent. You can find the API Token by going
+<p>The User's password or API token. You can find the API Token by going
 into that user's Jenkins page, click on <em>Configure</em>, then click on the
 <em>Show API Token...</em> button.</p>
 <p>This is set by default with a <code>use constant</code> clause. You may override
@@ -96,12 +105,13 @@ constant to an <code>undef</code></p>
 <dt><strong><a name="job" class="item">-job</a></strong></dt>
 
 <dd>
-<p>The Jenkins Job name. Required.</p>
+<p>This is taken by the <em>Promoted Build Plugin</em> <code>$PROMOTED_JOB_NAME</code> environment variable.</p>
 </dd>
 <dt><strong><a name="build" class="item">-build</a></strong></dt>
 
 <dd>
-<p>The Jenkins Build Number for that job. Required.</p>
+<p>The Jenkins Build Number for that job. This is taken by the <em>Promoted Build Plugin</em>
+<code>$PROMOTED_JOB</code> environment variable.</p>
 </dd>
 <dt><strong><a name="description" class="item">-description</a></strong></dt>
 

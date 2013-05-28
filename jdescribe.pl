@@ -4,6 +4,7 @@
 use 5.12.0;
 use warnings;
 
+use Env qw(JENKINS_URL PROMOTED_JOB_NAME PROMOTED_NUMBER);
 use LWP::UserAgent;
 use HTTP::Request::Common qw(POST);
 use Pod::Usage;
@@ -12,9 +13,9 @@ use Getopt::Long;
 use Data::Dumper;
 
 use constant {
-    JENKINS_URL             => "http://buildl02.tcprod.local/jenkins",
-    USER_ID                 => "dweintraub",
-    PASSWORD                => "192ada2b9f993161cae976dfa20dac89",
+    JENKINS_URL             => "$JENKINS_URL",
+    USER_ID                 => "jenkins",
+    PASSWORD                => "swordfish",
 };
 
 use constant {
@@ -25,9 +26,10 @@ use constant {
 my $jenkins_url	= JENKINS_URL;
 my $user	= USER_ID;
 my $password	= PASSWORD;
+my $job_name    = $PROMOTED_JOB_NAME;
+my $build       = $PROMOTED_NUMBER;
 
-my ( $job_name, $build, $description);
-my ( $help_wanted, $show_options, $show_documentation);
+my ( $description, $help_wanted, $show_options, $show_documentation );
 
 GetOptions (
     "jenkins=s"		=> \$jenkins_url,
@@ -119,8 +121,8 @@ jdescribe.pl
 
 =head1 SYNOPSIS
 
-    description [ -jenkins <jenkins_url> ] -job <job_name> \
-        -build <build_num> -description <description> \
+    description [ -jenkins <jenkins_url>  -job <job_name> ] \
+        [ -build <build_num> ] -description <description> \
 	[ -user <user_id> -password <password_or_api_token> ]
 
 =head1 DESCRIPTION
@@ -129,21 +131,30 @@ This program allows you to change the description of a Jenkins build.
 
 =head1 HOW HTTP WORKS IN PERL
 
-This program uses LWP and other associated Perl http modules (including
-HTTP::Request and URI).
+This program uses C<LWP::UserAgent> and C<HTTP::Request::Common>. These
+in turn require C<LWP>, C<URI>, C<HTTP::Response>, C<HTTP::Request>
+C<HTTP::Header>, C<HTTP::Message>, C<HTTP::Response> and others. None of
+these are standard Perl modules, but all should be installed via CPAN if
+you install C<LWP::UserAgent> and C<HTTP::Request::Common>.
 
-The way LWP works in Perl is a bit confusing. You create a I<browser> in
-Perl using the C<LWP::UserAgent->new> constructor.
+In order to use HTTP, you need to first create a virtual browser via the
+C<new> constructor of C<LWP::UserAgent>. Once you create this
+I<browser>, you can send HTTP requests via the C<request> method of
+C<LWP::UserAgent>.
 
-What you send to the browser to operate on are <HTTP Requests>. This is
-done via the C<HTTP::Request> module. However, there's a
-C<HTTP::Request::Common> module that uses a C<POST> subroutine to
-construct the C<HTTP::Request> object for you including the content to
-post.
+Constructing the requests is done by C<HTTP::Request> or the
+C<HTTP::Request::Common> modules. The C<HTTP::Request::Common> module
+handles C<POST> and C<GET> requests in a very easy to use manner and
+hides much of the complexity in creating requests.
 
-Once the request object is created, you can use the
-C<authentication_basic> method on the request and forward that request
-to the `C<LWP::UserAgent>` request method.
+In this program, the request is a C<POST> request in a form that
+contains a C<description> field which contains the description of that
+build. The request can do basic authorization via the
+C<authorization_basic> method.
+
+The constructed request is sent via the virtual browser, and an
+C<HTTP::response> object is returned. This program examines the response
+and verifies that the request was successful.
 
 =head1 OPTIONS
 
@@ -151,10 +162,10 @@ to the `C<LWP::UserAgent>` request method.
 
 =item -jenkins
 
-The URL of the Jenkins server. Default is set with C<use  constant>. You
-can override this with this option, or change the constant.
-
-B<NOTE>: This must start with C<http://> or C<https://>
+The URL of the Jenkins server. By default, this is taken from the
+C<$JENKINS_URL> environment variable that is set by Jenkins when it
+runs. If you use this parameter, be sure to give the full JENKINS URL
+including the C<HTTP://> or C<HTTPS://> protocol prefix.
 
 =item -user
 
@@ -166,7 +177,7 @@ an C<undef>;
 
 =item -password
 
-The User's password or API tokent. You can find the API Token by going
+The User's password or API token. You can find the API Token by going
 into that user's Jenkins page, click on I<Configure>, then click on the
 I<Show API Token...> button.
 
@@ -176,16 +187,20 @@ constant to an C<undef>
 
 =item -job
 
-The Jenkins Job name. Required.
+This is taken by the L<< Promoted Build
+Plugin|https://wiki.jenkins-ci.org/display/JENKINS/Promoted+Builds+Plugin
+>> C<$PROMOTED_JOB_NAME> environment variable.
 
 =item -build
 
-The Jenkins Build Number for that job. Required.
+The Jenkins Build Number for that job. This is taken by the L<Promoted
+Build
+Plugin|https://wiki.jenkins-ci.org/display/JENKINS/Promoted+Builds+Plugin>
+C<$PROMOTED_JOB> environment variable.
 
 =item -description
 
 The description you want to set the job to. Required
-
 
 =back
 
