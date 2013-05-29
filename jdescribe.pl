@@ -9,10 +9,10 @@ use HTTP::Request::Common qw(POST);
 use Pod::Usage;
 use Getopt::Long;
 
+use Env qw(JENKINS_URL PROMOTED_JOB_NAME PROMOTED_NUMBER);
 use Data::Dumper;
 
 use constant {
-    JENKINS_URL             => "http://buildl02.tcprod.local/jenkins",
     USER_ID                 => "dweintraub",
     PASSWORD                => "192ada2b9f993161cae976dfa20dac89",
 };
@@ -22,12 +22,13 @@ use constant {
     SUBMIT_DESCRIPTION      => 'submitDescription',
 };
 
-my $jenkins_url	= JENKINS_URL;
+my $jenkins_url	= $JENKINS_URL;
+my $job_name    = $PROMOTED_JOB_NAME;
+my $build       = $PROMOTED_NUMBER
 my $user	= USER_ID;
 my $password	= PASSWORD;
 
-my ( $job_name, $build, $description);
-my ( $help_wanted, $show_options, $show_documentation);
+my ( $description, $help_wanted, $show_options, $show_documentation);
 
 GetOptions (
     "jenkins=s"		=> \$jenkins_url,
@@ -119,8 +120,8 @@ jdescribe.pl
 
 =head1 SYNOPSIS
 
-    description [ -jenkins <jenkins_url> ] -job <job_name> \
-        -build <build_num> -description <description> \
+    description -description [ -jenkins <jenkins_url> ] \
+	[ -job <job_name> ]  [ -build <build_num> ] \
 	[ -user <user_id> -password <password_or_api_token> ]
 
 =head1 DESCRIPTION
@@ -129,21 +130,45 @@ This program allows you to change the description of a Jenkins build.
 
 =head1 HOW HTTP WORKS IN PERL
 
-This program uses LWP and other associated Perl http modules (including
-HTTP::Request and URI).
+This program requires the use of
+L<<
+LWP::UserAgent|http://search.cpan.org/~gaas/libwww-perl-6.05/lib/LWP/UserAgent.pm
+>> and L<<
+HTTP::Request::Common|http://search.cpan.org/~gaas/HTTP-Message-6.06/lib/HTTP/Request/Common.pm
+>>.  If you install these modules from CPAN, the following will also install:
 
-The way LWP works in Perl is a bit confusing. You create a I<browser> in
-Perl using the C<LWP::UserAgent->new> constructor.
+=over 4
 
-What you send to the browser to operate on are <HTTP Requests>. This is
-done via the C<HTTP::Request> module. However, there's a
-C<HTTP::Request::Common> module that uses a C<POST> subroutine to
-construct the C<HTTP::Request> object for you including the content to
-post.
+=item *
 
-Once the request object is created, you can use the
-C<authentication_basic> method on the request and forward that request
-to the `C<LWP::UserAgent>` request method.
+HTTP::LWP
+
+=item * 
+
+HTTP::Request
+
+=item *
+
+HTTP::Headers
+
+=item * HTTP::Response
+
+=item * URI
+
+=back
+
+and several others.
+
+In Perl, you use C<LWP::UserAgent> to create a virtual browser. You send this
+browser requests via C<HTTP::Request> or C<HTTP::Request::Common>.
+This program creates a C<POST> request via C<HTTP::Request::Common>.
+This post request contains the field C<description> and the description.
+It will also set the needed HTTP::Headers and use C<authorization_basic>
+in the request if the L<-user> and L<-password> parameters are also
+given.
+
+This request returns an HTTP::Response which is examined to make sure
+the request work.
 
 =head1 OPTIONS
 
@@ -151,8 +176,8 @@ to the `C<LWP::UserAgent>` request method.
 
 =item -jenkins
 
-The URL of the Jenkins server. Default is set with C<use  constant>. You
-can override this with this option, or change the constant.
+The URL of the Jenkins server. Default uses the C<$JENKINS_URL>
+environment variable if it is set.
 
 B<NOTE>: This must start with C<http://> or C<https://>
 
@@ -176,11 +201,13 @@ constant to an C<undef>
 
 =item -job
 
-The Jenkins Job name. Required.
+The Jenkins Job name. The default will be taken from the
+C<$PROMOTED_JOB_NAME> environment variable if it is set.
 
 =item -build
 
-The Jenkins Build Number for that job. Required.
+The Jenkins Build Number for that job. The default will be taken from
+the C<$PROMOTED_NUMBER> environment variable if it is set.
 
 =item -description
 
