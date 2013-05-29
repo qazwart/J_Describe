@@ -4,6 +4,7 @@
 use 5.12.0;
 use warnings;
 
+use Env qw(JENKINS_URL PROMOTED_JOB_NAME PROMOTED_NUMBER);
 use LWP::UserAgent;
 use HTTP::Request::Common qw(POST);
 use Pod::Usage;
@@ -13,8 +14,8 @@ use Env qw(JENKINS_URL PROMOTED_JOB_NAME PROMOTED_NUMBER);
 use Data::Dumper;
 
 use constant {
-    USER_ID                 => "dweintraub",
-    PASSWORD                => "192ada2b9f993161cae976dfa20dac89",
+    USER_ID                 => "jenkins",
+    PASSWORD                => "swordfish",
 };
 
 use constant {
@@ -24,11 +25,13 @@ use constant {
 
 my $jenkins_url	= $JENKINS_URL;
 my $job_name    = $PROMOTED_JOB_NAME;
-my $build       = $PROMOTED_NUMBER
+my $build       = $PROMOTED_NUMBER;
 my $user	= USER_ID;
 my $password	= PASSWORD;
+my $job_name    = $PROMOTED_JOB_NAME;
+my $build       = $PROMOTED_NUMBER;
 
-my ( $description, $help_wanted, $show_options, $show_documentation);
+my ( $description, $help_wanted, $show_options, $show_documentation );
 
 GetOptions (
     "jenkins=s"		=> \$jenkins_url,
@@ -176,10 +179,10 @@ the request work.
 
 =item -jenkins
 
-The URL of the Jenkins server. Default uses the C<$JENKINS_URL>
-environment variable if it is set.
-
-B<NOTE>: This must start with C<http://> or C<https://>
+The URL of the Jenkins server. By default, this is taken from the
+C<$JENKINS_URL> environment variable that is set by Jenkins when it
+runs. If you use this parameter, be sure to give the full JENKINS URL
+including the C<HTTP://> or C<HTTPS://> protocol prefix.
 
 =item -user
 
@@ -191,7 +194,7 @@ an C<undef>;
 
 =item -password
 
-The User's password or API tokent. You can find the API Token by going
+The User's password or API token. You can find the API Token by going
 into that user's Jenkins page, click on I<Configure>, then click on the
 I<Show API Token...> button.
 
@@ -201,6 +204,7 @@ constant to an C<undef>
 
 =item -job
 
+<<<<<<< HEAD
 The Jenkins Job name. The default will be taken from the
 C<$PROMOTED_JOB_NAME> environment variable if it is set.
 
@@ -212,7 +216,6 @@ the C<$PROMOTED_NUMBER> environment variable if it is set.
 =item -description
 
 The description you want to set the job to. Required
-
 
 =back
 

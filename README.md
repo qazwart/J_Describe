@@ -4,8 +4,8 @@ jdescribe.pl
 
 # SYNOPSIS
 
-    description [ -jenkins <jenkins_url> ] -job <job_name> \
-        -build <build_num> -description <description> \
+    description [ -jenkins <jenkins_url>  -job <job_name> ] \
+        [ -build <build_num> ] -description <description> \
 	[ -user <user_id> -password <password_or_api_token> ]
 
 # DESCRIPTION
@@ -14,30 +14,39 @@ This program allows you to change the description of a Jenkins build.
 
 # HOW HTTP WORKS IN PERL
 
-This program uses LWP and other associated Perl http modules (including
-HTTP::Request and URI).
+This program uses `LWP::UserAgent` and `HTTP::Request::Common`. These
+in turn require `LWP`, `URI`, `HTTP::Response`, `HTTP::Request`
+`HTTP::Header`, `HTTP::Message`, `HTTP::Response` and others. None of
+these are standard Perl modules, but all should be installed via CPAN if
+you install `LWP::UserAgent` and `HTTP::Request::Common`.
 
-The way LWP works in Perl is a bit confusing. You create a _browser_ in
-Perl using the `LWP::UserAgent-`new> constructor.
+In order to use HTTP, you need to first create a virtual browser via the
+`new` constructor of `LWP::UserAgent`. Once you create this
+_browser_, you can send HTTP requests via the `request` method of
+`LWP::UserAgent`.
 
-What you send to the browser to operate on are <HTTP Requests>. This is
-done via the `HTTP::Request` module. However, there's a
-`HTTP::Request::Common` module that uses a `POST` subroutine to
-construct the `HTTP::Request` object for you including the content to
-post.
+Constructing the requests is done by `HTTP::Request` or the
+`HTTP::Request::Common` modules. The `HTTP::Request::Common` module
+handles `POST` and `GET` requests in a very easy to use manner and
+hides much of the complexity in creating requests.
 
-Once the request object is created, you can use the
-`authentication_basic` method on the request and forward that request
-to the \``LWP::UserAgent`\` request method.
+In this program, the request is a `POST` request in a form that
+contains a `description` field which contains the description of that
+build. The request can do basic authorization via the
+`authorization_basic` method.
+
+The constructed request is sent via the virtual browser, and an
+`HTTP::response` object is returned. This program examines the response
+and verifies that the request was successful.
 
 # OPTIONS
 
 - \-jenkins
 
-    The URL of the Jenkins server. Default is set with `use  constant`. You
-    can override this with this option, or change the constant.
-
-    __NOTE__: This must start with `http://` or `https://`
+    The URL of the Jenkins server. By default, this is taken from the
+    `$JENKINS_URL` environment variable that is set by Jenkins when it
+    runs. If you use this parameter, be sure to give the full JENKINS URL
+    including the `HTTP://` or `HTTPS://` protocol prefix.
 
 - \-user
 
@@ -49,7 +58,7 @@ to the \``LWP::UserAgent`\` request method.
 
 - \-password
 
-    The User's password or API tokent. You can find the API Token by going
+    The User's password or API token. You can find the API Token by going
     into that user's Jenkins page, click on _Configure_, then click on the
     _Show API Token..._ button.
 
@@ -59,17 +68,16 @@ to the \``LWP::UserAgent`\` request method.
 
 - \-job
 
-    The Jenkins Job name. Required.
+    This is taken by the [Promoted Build Plugin](https://wiki.jenkins-ci.org/display/JENKINS/Promoted+Builds+Plugin) `$PROMOTED_JOB_NAME` environment variable.
 
 - \-build
 
-    The Jenkins Build Number for that job. Required.
+    The Jenkins Build Number for that job. This is taken by the [Promoted Build Plugin](https://wiki.jenkins-ci.org/display/JENKINS/Promoted+Builds+Plugin)
+    `$PROMOTED_JOB` environment variable.
 
 - \-description
 
     The description you want to set the job to. Required
-
-
 
 # AUTHOR
 
