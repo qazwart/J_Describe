@@ -28,8 +28,6 @@ my $job_name    = $PROMOTED_JOB_NAME;
 my $build       = $PROMOTED_NUMBER;
 my $user	= USER_ID;
 my $password	= PASSWORD;
-my $job_name    = $PROMOTED_JOB_NAME;
-my $build       = $PROMOTED_NUMBER;
 
 my ( $description, $help_wanted, $show_options, $show_documentation );
 
@@ -81,6 +79,7 @@ if ( $user and $password ) {
     $request->url($jenkins_url);
     $request->authorization_basic( $user, $password );
     my $response = $browser->request($request);
+
     if ( not $response->is_success ) {
 	die qq(Cannot log into Jenkins Server "$jenkins_url");
     }
@@ -204,7 +203,6 @@ constant to an C<undef>
 
 =item -job
 
-<<<<<<< HEAD
 The Jenkins Job name. The default will be taken from the
 C<$PROMOTED_JOB_NAME> environment variable if it is set.
 

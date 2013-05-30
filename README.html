@@ -38,8 +38,8 @@
 <hr />
 <h1><a name="synopsis">SYNOPSIS</a></h1>
 <pre>
-    description [ -jenkins &lt;jenkins_url&gt;  -job &lt;job_name&gt; ] \
-        [ -build &lt;build_num&gt; ] -description &lt;description&gt; \
+    description -description [ -jenkins &lt;jenkins_url&gt; ] \
+        [ -job &lt;job_name&gt; ]  [ -build &lt;build_num&gt; ] \
         [ -user &lt;user_id&gt; -password &lt;password_or_api_token&gt; ]</pre>
 <p>
 </p>
@@ -50,26 +50,35 @@
 </p>
 <hr />
 <h1><a name="how_http_works_in_perl">HOW HTTP WORKS IN PERL</a></h1>
-<p>This program uses <code>LWP::UserAgent</code> and <code>HTTP::Request::Common</code>. These
-in turn require <code>LWP</code>, <code>URI</code>, <code>HTTP::Response</code>, <code>HTTP::Request</code>
-<code>HTTP::Header</code>, <code>HTTP::Message</code>, <code>HTTP::Response</code> and others. None of
-these are standard Perl modules, but all should be installed via CPAN if
-you install <code>LWP::UserAgent</code> and <code>HTTP::Request::Common</code>.</p>
-<p>In order to use HTTP, you need to first create a virtual browser via the
-<code>new</code> constructor of <code>LWP::UserAgent</code>. Once you create this
-<em>browser</em>, you can send HTTP requests via the <code>request</code> method of
-<code>LWP::UserAgent</code>.</p>
-<p>Constructing the requests is done by <code>HTTP::Request</code> or the
-<code>HTTP::Request::Common</code> modules. The <code>HTTP::Request::Common</code> module
-handles <code>POST</code> and <code>GET</code> requests in a very easy to use manner and
-hides much of the complexity in creating requests.</p>
-<p>In this program, the request is a <code>POST</code> request in a form that
-contains a <a href="#description"><code>description</code></a> field which contains the description of that
-build. The request can do basic authorization via the
-<code>authorization_basic</code> method.</p>
-<p>The constructed request is sent via the virtual browser, and an
-<code>HTTP::response</code> object is returned. This program examines the response
-and verifies that the request was successful.</p>
+<p>This program requires the use of
+<em>&lt; LWP::UserAgent</em>&gt; and <em>&lt; HTTP::Request::Common</em>&gt;.  If you install these modules from CPAN, the following will also install:</p>
+<ul>
+<li>
+<p>HTTP::LWP</p>
+</li>
+<li>
+<p>HTTP::Request</p>
+</li>
+<li>
+<p>HTTP::Headers</p>
+</li>
+<li><strong><a name="http_response" class="item">HTTP::Response</a></strong>
+
+</li>
+<li><strong><a name="uri" class="item">URI</a></strong>
+
+</li>
+</ul>
+<p>and several others.</p>
+<p>In Perl, you use <code>LWP::UserAgent</code> to create a virtual browser. You send this
+browser requests via <code>HTTP::Request</code> or <code>HTTP::Request::Common</code>.
+This program creates a <code>POST</code> request via <code>HTTP::Request::Common</code>.
+This post request contains the field <a href="#description"><code>description</code></a> and the description.
+It will also set the needed HTTP::Headers and use <code>authorization_basic</code>
+in the request if the <a href="#user">-user</a> and <a href="#password">-password</a> parameters are also
+given.</p>
+<p>This request returns an HTTP::Response which is examined to make sure
+the request work.</p>
 <p>
 </p>
 <hr />
@@ -105,13 +114,14 @@ constant to an <code>undef</code></p>
 <dt><strong><a name="job" class="item">-job</a></strong></dt>
 
 <dd>
-<p>This is taken by the <em>Promoted Build Plugin</em> <code>$PROMOTED_JOB_NAME</code> environment variable.</p>
+<p>The Jenkins Job name. The default will be taken from the
+<code>$PROMOTED_JOB_NAME</code> environment variable if it is set.</p>
 </dd>
 <dt><strong><a name="build" class="item">-build</a></strong></dt>
 
 <dd>
-<p>The Jenkins Build Number for that job. This is taken by the <em>Promoted Build Plugin</em>
-<code>$PROMOTED_JOB</code> environment variable.</p>
+<p>The Jenkins Build Number for that job. The default will be taken from
+the <code>$PROMOTED_NUMBER</code> environment variable if it is set.</p>
 </dd>
 <dt><strong><a name="description" class="item">-description</a></strong></dt>
 
